@@ -26,33 +26,43 @@ def is_prime(n):
 
 
 # A function to generate a random permutation of arr[]
-def randomize(arr, n):
+def randomize(arr1, arr2, n):
     # Start from the last element and swap one by one. We don't
     # need to run for the first element that's why i > 0
-    for i in range(n - 1, 0, -1):
+    for i in range(n-1, 0, -1):
         # Pick a random index from 0 to i
         j = random.randint(0, i)
 
         # Swap arr[i] with the element at random index
-        arr[i], arr[j] = arr[j], arr[i]
-    return arr
+        arr1[i], arr1[j] = arr1[j], arr1[i]
+        arr2[i], arr2[j] = arr2[j], arr2[i]
+    return
 
 
+output_file = "new.png"
 message = "this message is encrypted"
 message = message.replace(" ", "")
 message = message.lower()
-alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "", "i", "j", "k", "l", "m",
+alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
             "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
+key_alphabet = alphabet.copy()
+print(key_alphabet)
 primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101]
 
-randomize(primes, len(primes))
+randomize(primes, key_alphabet, len(primes))
+print(key_alphabet)
+
+key_string = ""
+for letter in key_alphabet:
+    key_string += letter
+key_string = key_string.upper()
 
 prime_message = []
 
 for c in message:
     prime_message.append(primes[alphabet.index(c)])
 
-print(prime_message)
+#print(prime_message)
 path = r"C:\Users\radem\PycharmProjects\PrimeSteg\test2.jpg"
 img = Image.open(path)
 
@@ -100,13 +110,17 @@ for i in range(0, len(prime_message)):
 #print(ary)
 
 ary.resize(rows, cols, 3)
-for i in range(0, rows):
-    for j in range(0, cols):
-        for k in range(0, depth):
-            if ary[i, j, k] < 102:
-                if is_prime(ary[i, j, k]):
-                        print(ary[i, j, k])
+# for i in range(0, rows):
+#     for j in range(0, cols):
+#         for k in range(0, depth):
+#             if ary[i, j, k] < 102:
+#                 if is_prime(ary[i, j, k]):
+#                         print(ary[i, j, k])
 
 hidden_image = Image.fromarray(ary, 'RGB')
 
-hidden_image.save("new.png")
+hidden_image.save(output_file)
+
+print("Message encrypted: " + message)
+print("Alphabet Key used: " + key_string)
+print("Output file: " + output_file)
