@@ -57,27 +57,30 @@ def encrypt(message, input_file, output_file, key):
     key_string = ""
 
     if len(key) > 0:
+        # A key was provided, set this as the encryption scheme
         key_string = key
         key = key.lower()
         for i in range(len(key)):
             alphabet[i] = key[i]
 
     else:
+        # Create the substitution cipher for the prime encoding
         randomize(primes, key_alphabet, len(primes))
-        key_string = key
         for letter in key_alphabet:
             key_string += letter
         key_string = key_string.upper()
 
+    # Encode the message with the substitution scheme
     prime_message = []
-
     for c in message:
         prime_message.append(primes[alphabet.index(c)])
 
+    # Record the original dimensions of the image array
     rows = ary.shape[0]
     cols = ary.shape[1]
     depth = ary.shape[2]
 
+    # Strip all first 26 prime numbers from the RGB data
     for i in range(0, rows):
         for j in range(0, cols):
             for k in range(0, depth):
@@ -91,12 +94,11 @@ def encrypt(message, input_file, output_file, key):
     total_cells = rows * cols
     insertion_interval = total_cells / len(prime_message)
     insertion_interval = math.floor(insertion_interval)
-    print(total_cells)
-    print(insertion_interval)
 
+    # Resize the array to be a list of pixels with their RGB values
     ary.resize(total_cells, 3)
-    # print(ary)
 
+    # Hide each letter in its own chunk where the prime is the closest to the original value
     for i in range(0, len(prime_message)):
         value = prime_message[i]
         closest_value = ary[(i*insertion_interval), 0]
@@ -108,12 +110,14 @@ def encrypt(message, input_file, output_file, key):
                     closest_index = [j, k]
         ary[closest_index[0], closest_index[1]] = value
 
+    # Resize the array to the dimensions of the original image
     ary.resize(rows, cols, 3)
 
+    # Convert the array back to an image and save it
     hidden_image = Image.fromarray(ary, 'RGB')
-
     hidden_image.save(output_file)
 
+    # Return encryption statistics to the GUI
     return [message, key_string, output_file]
 
 
