@@ -39,88 +39,82 @@ def randomize(arr1, arr2, n):
     return
 
 
-output_file = "new.png"
-message = "this message is encrypted"
-message = message.replace(" ", "")
-message = message.lower()
-alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
-            "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
-key_alphabet = alphabet.copy()
-print(key_alphabet)
-primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101]
+def encrypt(message, input_file, output_file, key):
+    # Format the message
+    message = message.replace(" ", "")
+    message_stripped = ''.join(c for c in message if c.isalpha())
+    message = message_stripped.lower()
 
-randomize(primes, key_alphabet, len(primes))
-print(key_alphabet)
+    # Open the image file
+    img = Image.open(input_file)
+    ary = np.array(img)
 
-key_string = ""
-for letter in key_alphabet:
-    key_string += letter
-key_string = key_string.upper()
+    alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+                "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
+    key_alphabet = alphabet.copy()
 
-prime_message = []
+    primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101]
+    key_string = ""
 
-for c in message:
-    prime_message.append(primes[alphabet.index(c)])
+    if len(key) > 0:
+        key_string = key
+        key = key.lower()
+        for i in range(len(key)):
+            alphabet[i] = key[i]
 
-#print(prime_message)
-path = r"C:\Users\radem\PycharmProjects\PrimeSteg\test2.jpg"
-img = Image.open(path)
+    else:
+        randomize(primes, key_alphabet, len(primes))
+        key_string = key
+        for letter in key_alphabet:
+            key_string += letter
+        key_string = key_string.upper()
 
-ary = np.array(img)
+    prime_message = []
 
-#print(ary.shape)
-#print(ary)
+    for c in message:
+        prime_message.append(primes[alphabet.index(c)])
 
-rows = ary.shape[0]
-cols = ary.shape[1]
-depth = ary.shape[2]
+    rows = ary.shape[0]
+    cols = ary.shape[1]
+    depth = ary.shape[2]
+
+    for i in range(0, rows):
+        for j in range(0, cols):
+            for k in range(0, depth):
+                if ary[i, j, k] < 102:
+                    if ary[i, j, k] == 2 or ary[i, j, k] == 3:
+                        ary[i, j, k] = 4
+                    else:
+                        if is_prime(ary[i, j, k]):
+                            ary[i, j, k] = ary[i, j, k] - 1
+
+    total_cells = rows * cols
+    insertion_interval = total_cells / len(prime_message)
+    insertion_interval = math.floor(insertion_interval)
+    print(total_cells)
+    print(insertion_interval)
+
+    ary.resize(total_cells, 3)
+    # print(ary)
+
+    for i in range(0, len(prime_message)):
+        value = prime_message[i]
+        closest_value = ary[(i*insertion_interval), 0]
+        closest_index = [(i*insertion_interval), 0]
+        for j in range((i * insertion_interval), ((i * insertion_interval) + insertion_interval)):
+            for k in range(0, 3):
+                if np.abs(value - closest_value) > np.abs(value - ary[j, k]):
+                    closest_value = ary[j, k]
+                    closest_index = [j, k]
+        ary[closest_index[0], closest_index[1]] = value
+
+    ary.resize(rows, cols, 3)
+
+    hidden_image = Image.fromarray(ary, 'RGB')
+
+    hidden_image.save(output_file)
+
+    return [message, key_string, output_file]
 
 
-for i in range(0, rows):
-    for j in range(0, cols):
-        for k in range(0, depth):
-            if ary[i, j, k] < 102:
-                if ary[i, j, k] == 2 or ary[i, j, k] == 3:
-                    ary[i, j, k] = 4
-                else:
-                    if is_prime(ary[i, j, k]):
-                        ary[i, j, k] = ary[i, j, k] - 1
 
-
-total_cells = rows*cols
-insertion_interval = total_cells/len(prime_message)
-insertion_interval = math.floor(insertion_interval)
-#print(total_cells)
-#print(insertion_interval)
-
-ary.resize(total_cells, 3)
-#print(ary)
-
-for i in range(0, len(prime_message)):
-    value = prime_message[i]
-    closest_value = ary[i, 0]
-    closest_index = [i, 0]
-    for j in range((i*insertion_interval), ((i*insertion_interval)+insertion_interval)):
-        for k in range(0, 3):
-            if np.abs(value - closest_value) > np.abs(value - ary[j, k]):
-                closest_value = ary[j, k]
-                closest_index = [j, k]
-    ary[closest_index[0], closest_index[1]] = value
-
-#print(ary)
-
-ary.resize(rows, cols, 3)
-# for i in range(0, rows):
-#     for j in range(0, cols):
-#         for k in range(0, depth):
-#             if ary[i, j, k] < 102:
-#                 if is_prime(ary[i, j, k]):
-#                         print(ary[i, j, k])
-
-hidden_image = Image.fromarray(ary, 'RGB')
-
-hidden_image.save(output_file)
-
-print("Message encrypted: " + message)
-print("Alphabet Key used: " + key_string)
-print("Output file: " + output_file)

@@ -28,7 +28,7 @@ def is_prime(n):
     return True
 
 
-path = r"C:\Users\radem\PycharmProjects\PrimeSteg\new.png"
+path = r"C:\Users\radem\PycharmProjects\PrimeSteg\test3_ENCRYPTED.png"
 img = Image.open(path)
 
 alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
