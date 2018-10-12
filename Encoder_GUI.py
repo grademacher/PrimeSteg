@@ -22,7 +22,7 @@ def encrypt_message(event):
     global output_file_name
     global encryption_key
     # Get the information from the entry boxes
-    decrypted_message = message.get()
+    decrypted_message = message.get("1.0", END)
     output_file_name = output_file.get()
     encryption_key = alphabet_key.get()
 
@@ -34,6 +34,13 @@ def encrypt_message(event):
     # Check to make sure an input file name was provided
     if len(input_file_name) < 1:
         messagebox.showinfo("Alert", "Please enter a file to use.")
+        return
+
+    # Check to make sure the input file name is valid
+    input_name_ary = input_file_name.split(".")
+    file_extension = input_name_ary[1]
+    if file_extension != "png" and file_extension != "jpg":
+        messagebox.showinfo("Alert", "Please select a png or jpg image to encrypt with.")
         return
 
     # If an output file name was not provided, create one
@@ -67,13 +74,6 @@ def encrypt_message(event):
             messagebox.showinfo("Alert", "The encryption key must contain all letters of the alphabet")
             return
         encryption_key = encryption_key.upper()
-
-    # Check to make sure the input file name is valid
-    input_name_ary = input_file_name.split(".")
-    file_extension = input_name_ary[1]
-    if file_extension != "png" and file_extension != "jpg":
-        messagebox.showinfo("Alert", "Please select a png or jpg image to encrypt with.")
-        return
 
     # Call the encryption function and hold onto the results
     return_items = encoder.encrypt(decrypted_message, input_file_name, output_file_name, encryption_key)
